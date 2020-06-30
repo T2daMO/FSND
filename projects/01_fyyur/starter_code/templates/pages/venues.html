@@ -2,18 +2,34 @@
 {% block title %}Fyyur | Venues{% endblock %}
 {% block content %}
 {% for area in areas %}
+<style>
+
+    .delete-button {
+    	border: 12px;
+        outline: 12px;
+		text-align: center;
+		text-decoration: none;
+		-webkit-appearance: none;
+        cursor: pointer;
+        font-size: 11px;}
+
+</style>
 <h3>{{ area.city }}, {{ area.state }}</h3>
+
+
 	<ul class="items">
-		{% for venue in area.venues %}
 		<li>
-			<a href="/venues/{{ venue.id }}">
+			<a href="/venues/{{ area.id }}">
 				<i class="fas fa-music"></i>
 				<div class="item">
-					<h5>{{ venue.name }}</h5>
+					<h5>{{ area.name }}</h5>
 				</div>
 			</a>
+		    
 		</li>
-		{% endfor %}
+		<button class="delete-button" data-id="{{ area.id }}">Delete Venue</button>
 	</ul>
+
 {% endfor %}
 {% endblock %}
+
