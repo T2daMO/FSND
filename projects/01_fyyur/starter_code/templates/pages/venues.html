@@ -33,9 +33,9 @@
 	<script type="text/javascript">
     const deleteBtns = document.querySelectorAll('.delete-button');
     for (let i = 0; i < deleteBtns.length; i++) {
-      const btn = deleteBtns[i];
+      btn = deleteBtns[i];
       btn.onclick = function(e) {
-        const venueItem = e.target.dataset['data-id'];
+        venueItem = e.target.dataset['data-id'];
         fetch('/venues/' + venueItem, {
           method: 'DELETE'
         })
