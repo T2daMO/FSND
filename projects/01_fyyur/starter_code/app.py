@@ -17,6 +17,7 @@ from flask_migrate import Migrate
 from Tools.scripts.texi2html import increment
 from alembic.util.sqla_compat import AUTOINCREMENT_DEFAULT
 import sys
+from sqlalchemy import func
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -61,6 +62,7 @@ class Venue(db.Model):
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
+    
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String)
     phone = db.Column(db.String(120))
@@ -142,16 +144,76 @@ def search_venues():
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
-    venue = Venue.query.all()
-    artists = Artist.query.all()
+    venue1 = Venue.query.get(venue_id) 
+    artist =get_referencing_foreign_keys(venue_id)
+    rows = db.session.query(func.count(Venue.artist_id)).scalar()
     data1={
-    "id": "Venue.id",
-      "name": artists.name,
-      "genres": venue.genres,
-      "address": venue.address,
-      "city": venue.city,
-      "state": venue.state
+        "id": artist,
+        "name": venue1.name,
+        "genres":venue1.genres,
+        "address": venue1.address,
+        "city": venue1.city,
+        "state": venue1.state,
+        "phone": venue1.phone,
+      "website": "https://www.themusicalhop.com",
+      "facebook_link": venue1.facebook_link,
+      "seeking_talent": True,
+      "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
+      "image_link": venue1.image_link,
+      "past_shows": [{
+        "artist_id": artist,
+        "artist_name": artist.name,
+        "artist_image_link": artist.image_link,
+        "start_time": "2019-05-21T21:30:00.000Z"
+      }],
+      "upcoming_shows": [],
+      "past_shows_count": rows,
+      "upcoming_shows_count": 0,}
+    data2={
+      "id": 1,
+      "name": "The Musical Hop",
+      "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
+      "address": "1015 Folsom Street",
+      "city": "San Francisco",
+      "state": "CA",
+      "phone": "123-123-1234",
+      "website": "https://www.themusicalhop.com",
+      "facebook_link": "https://www.facebook.com/TheMusicalHop",
+      "seeking_talent": True,
+      "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
+      "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
+      "past_shows": [{
+        "artist_id": 4,
+        "artist_name": "Guns N Petals",
+        "artist_image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
+        "start_time": "2019-05-21T21:30:00.000Z"
+      }],
+      "upcoming_shows": [],
+      "past_shows_count": 1,
+      "upcoming_shows_count": 0,
       }
+    data3={
+      "id":1,
+      "name": "The Musical Hop",
+      "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
+      "address": "1015 Folsom Street",
+      "city": "San Francisco",
+      "state": "CA",
+      "phone": "123-123-1234",
+      "website": "https://www.themusicalhop.com",
+      "facebook_link": "https://www.facebook.com/TheMusicalHop",
+      "seeking_talent": True,
+      "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
+      "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
+      "past_shows": [{
+        "artist_id": 4,
+        "artist_name": "Guns N Petals",
+        "artist_image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
+        "start_time": "2019-05-21T21:30:00.000Z"
+      }],
+      "upcoming_shows": [],
+      "past_shows_count": 1,
+      "upcoming_shows_count": 0,}
       
     data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[0]
     return render_template('pages/show_venue.html', venue=data)
@@ -189,7 +251,7 @@ def create_venue_submission():
         return render_template('errors/500.html')
     else:
         flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # on successful db insert, flash success
+  #on successful db insert, flash success
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
@@ -198,17 +260,18 @@ def create_venue_submission():
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
-  # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-  venue = Venue.query.get(venue_id)
-  if request.method == 'DELETE':
-      db.session.delete(venue)
-      db.session.commit()
-      return {"message": f"Car {car.name} successfully deleted."}
-  
-    
+  # SQLAlchemy ORM to del 
+  ete a record. Handle cases where the session commit could fail.
+    try:
+        Venue.query.filter_by(venue_id).delete()
+        db.session.commit()
+    except:
+        db.session.rollback()
+    finally:
+        db.session.close
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
-  return render_template('pages/home.html')
+    return render_template('pages/home.html')
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -258,7 +321,7 @@ def show_artist(artist_id):
     except:
         error = True
         db.session.rollback()
-        print(sys.exc_info())
+         print(sys.exc_info())
     finally:
         db.session.close()
     if error:
@@ -346,12 +409,15 @@ def shows():
   # displays list of shows at /shows
   # TODO: replace with real venues data.
   # num_shows should be aggregated based on number of upcoming shows per venue.
+  venue = Venue.query.all()
+  artist = Artist.query.all()
+  
   data=[{
-    "venue_id": 1,
-    "venue_name": "The Musical Hop",
-    "artist_id": 4,
-    "artist_name": "Guns N Petals",
-    "artist_image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
+    "venue_id": venue.id,
+    "venue_name": venue.name,
+    "artist_id": artist.id,
+    "artist_name": artist.name,
+    "artist_image_link": artist.image_link,
     "start_time": "2019-05-21T21:30:00.000Z"
   }, {
     "venue_id": 3,

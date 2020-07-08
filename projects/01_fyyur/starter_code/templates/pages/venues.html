@@ -2,22 +2,22 @@
 {% block title %}Fyyur | Venues{% endblock %}
 {% block content %}
 {% for area in areas %}
-<style>
-
-    .delete-button {
-    	border: 12px;
+<style>    
+	.btn {
+    	border: 20px;
         outline: 14px;
 		text-align: center;
 		text-decoration: none;
 		-webkit-appearance: none;
         cursor: pointer;
-        font-size: 11px;}
+        font-size: 11px;
+        color: orange;
+        }
 
 </style>
-<h3>{{ area.city }}, {{ area.state }}</h3>
-
-
-	<ul class="items" id = "venues">
+	<ul class="items" id="venues">
+		<h3>{{ area.city }}, {{ area.state }}</h3>
+	
 		<li>
 			<a href="/venues/{{ area.id }}">
 				<i class="fas fa-music"></i>
@@ -25,23 +25,18 @@
 					<h5>{{ area.name }}</h5>
 				</div>
 			</a>
+			
 		 </li>
+		 <button class="btn  btn-sm rounded-0" data-id="{{ area.id }}" type="button" data-toggle="tooltip" data-placement="top" title="Delete"  ><i class="fa fa-trash"></i></button>
 	</ul>
-	<button class=" delete-button" data-id="{{ area.id }}">Delete Venue</button>
 	{% endfor %}
 	{% endblock %}
-	<script type="text/javascript">
-    const deleteBtns = document.querySelectorAll('.delete-button');
-    for (let i = 0; i < deleteBtns.length; i++) {
-      btn = deleteBtns[i];
-      btn.onclick = function(e) {
-        venueItem = e.target.dataset['data-id'];
-        fetch('/venues/' + venueItem, {
-          method: 'DELETE'
-        })
-        .then(function() {
-          const item = e.target.parentElement;
-          item.remove();
-        })
-	</script>
+	<<script type="text/javascript">
+	$("ul").on("click", "button", function(e) {
+	    e.preventDefault();
+	    $(this).parent().remove();
+	});
+</script>
+
+
 
