@@ -32,6 +32,7 @@ class Question(db.Model):
   answer = Column(String)
   category = Column(String)
   difficulty = Column(Integer)
+  category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
 
   def __init__(self, question, answer, category, difficulty):
     self.question = question
@@ -51,13 +52,13 @@ class Question(db.Model):
     db.session.commit()
 
   def format(self):
-    return {
-      'id': self.id,
-      'question': self.question,
-      'answer': self.answer,
-      'category': self.category,
-      'difficulty': self.difficulty
-    }
+      return {
+        'id': self.id,
+        'question': self.question,
+        'answer': self.answer,
+        'category': self.category,
+        'difficulty': self.difficulty
+        }
 
 '''
 Category
@@ -68,9 +69,13 @@ class Category(db.Model):
 
   id = Column(Integer, primary_key=True)
   type = Column(String)
-
+      
   def __init__(self, type):
     self.type = type
+
+  def insert(self):
+    db.session.add(self)
+    db.session.commit()
 
   def format(self):
     return {
