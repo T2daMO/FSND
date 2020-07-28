@@ -6,6 +6,8 @@ import random
 
 from models import setup_db, Question, Category
 from flask.templating import render_template
+from backend import test_flaskr
+
 
 QUESTIONS_PER_PAGE = 10
 
