@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, abort, jsonify
+from flask import Flask, request, abort, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
@@ -112,11 +112,10 @@ def create_app(test_config=None):
                })
         except:
             abort(422)
-
-    @app.route('/questions', methods=['POST'])    
-    def get_specific_question():
-        search = body.get('search',None)
-        questions = Question.query.order_by(Question.id).filter_by(Question.question.ilike('%{}%'.format(search)))
+            
+    @app.route('/questions/<search>', methods=['POST'])    
+    def get_apecific_question(search):
+        questions = Question.query.filter_by(Question.question.ilike('%{}%'.format(search))).all()
         current_questions = paginate_questions(request, questions)
         
         if len(questions) == 0:
@@ -125,14 +124,14 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'question': current_questions,
-            'total_questions': len(questions.all())
+            'total_questions': len(current_questions)
             })
 
-    @app.route('/categories', methods=['GET'])
-    def get_question_by_category():
-        search = body.get('search',None)
-        questions = Question.query.order_by(Question.id).filter_by(Question.category_id)
-        current_questions = paginate_questions(request, questions)
+    @app.route('/questions/<category>', methods=['GET'])
+    def get_question_by_category(category):
+        new_category_name = Question.query.filter_by(category=category).all()
+        current_questions = paginate_questions(request, new_category_name)
+        
         return jsonify({
             'success': True,
             'question': current_questions
@@ -149,10 +148,22 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not. 
     '''
-    @app.route('/questions/quiz', methods=['POST'])
+    @app.route('/questions/quiz/<category>', methods=['POST'])
     def get_quiz_questions():
-        l = print("done")
-        return render_template('/frontend/index.html',l)
+        question = Question.query.filter_by(category=category).all()
+        previous_question = paginate_questions(request, question)
+        
+        random.shuffle(questions)
+        session['previous_question'] = previous_question
+        if 'previous_question' in session:
+            return jsonify({"Success": True})
+        else:
+            return jsonify({'Success': False})
+        
+        return jsonify({
+            'success': True,
+            'question': previous_question
+            })
        
     '''
     @TODO: 
