@@ -8,7 +8,7 @@
         outline: 14px;
 		text-align: center;
 		text-decoration: none;
-		-webkit-appearance: none;
+		
         cursor: pointer;
         font-size: 11px;
         color: orange;
@@ -25,18 +25,12 @@
 					<h5>{{ area.name }}</h5>
 				</div>
 			</a>
-			
 		 </li>
-		 <button class="btn  btn-sm rounded-0" data-id="{{ area.id }}" type="button" data-toggle="tooltip" data-placement="top" title="Delete"  ><i class="fa fa-trash"></i></button>
+		 <button class="btn btn-sm rounded-0" name="button" data-id="{{ area.id }}" type="button" data-toggle="tooltip" data-placement="top" title="Delete"  ><i class="fa fa-trash"></i></button>
 	</ul>
 	{% endfor %}
 	{% endblock %}
-	<<script type="text/javascript">
-	$("ul").on("click", "button", function(e) {
-	    e.preventDefault();
-	    $(this).parent().remove();
-	});
-</script>
+
 
 
 
